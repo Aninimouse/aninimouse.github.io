@@ -49,6 +49,7 @@ const EXPORT_DATA = {"tokens":[{"id":"E628C44C065D4CB38AEED316AC0E53D2","name":"
 
 let activeTokenId = null;
 const db = EXPORT_DATA;
+let entitySortState = { field: '', asc: true };
 
 function init() {
     renderTokenList();
@@ -59,8 +60,8 @@ function renderTokenList() {
     const col = document.createElement('div');
     col.className = 'col-tokens';
     const header = document.createElement('div');
-    header.style = 'padding: 15px; font-size: 14pt; font-weight: bold; border-bottom: 2px solid #555;';
-    header.textContent = 'Entities';
+    header.className = 'token-header';
+    header.innerHTML = `Entities <span><span class='token-sort-btn' onclick='sortEntities(\"name\")'>Name ⬍</span> <span class='token-sort-btn' onclick='sortEntities(\"type\")'>Type ⬍</span></span>`;
     col.appendChild(header);
 
     db.tokens.forEach(t => {
@@ -84,9 +85,59 @@ function renderTokenList() {
     document.getElementById('app-container').appendChild(insCol);
 }
 
+function sortEntities(field) {
+    const container = document.querySelector('.col-tokens');
+    const items = Array.from(container.querySelectorAll('.token-item'));
+    if (items.length <= 1) return;
+
+    if (entitySortState.field === field) {
+        entitySortState.asc = !entitySortState.asc;
+    } else {
+        entitySortState.field = field;
+        entitySortState.asc = true;
+    }
+
+    items.sort((a, b) => {
+        const valA = a.querySelector(field === 'name' ? '.token-name' : '.token-type').innerText.trim();
+        const valB = b.querySelector(field === 'name' ? '.token-name' : '.token-type').innerText.trim();
+        return entitySortState.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+    items.forEach(item => container.appendChild(item));
+}
+
+function sortTable(th, colIndex, isNumeric) {
+    const table = th.closest('table');
+    const tbody = table.querySelector('tbody') || table;
+    const rows = Array.from(table.querySelectorAll('tr')).slice(1);
+    if (rows.length <= 1) return;
+
+    const isAsc = th.getAttribute('data-sort') !== 'asc';
+    table.querySelectorAll('th').forEach(h => {
+        h.removeAttribute('data-sort');
+        h.innerText = h.innerText.replace(/ [▲▼]/, '');
+    });
+
+    th.setAttribute('data-sort', isAsc ? 'asc' : 'desc');
+    th.innerText += isAsc ? ' ▲' : ' ▼';
+
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.children[colIndex].innerText.trim();
+        const cellB = rowB.children[colIndex].innerText.trim();
+        if (isNumeric) {
+            const numA = parseFloat(cellA) || 0;
+            const numB = parseFloat(cellB) || 0;
+            return isAsc ? numA - numB : numB - numA;
+        }
+        return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
 function selectToken(tokenId) {
     document.querySelectorAll('.token-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('token-tab-' + tokenId).classList.add('active');
+    const tab = document.getElementById('token-tab-' + tokenId);
+    if(tab) tab.classList.add('active');
     activeTokenId = tokenId;
 
     const token = db.tokens.find(t => t.id === tokenId);
@@ -142,7 +193,13 @@ function renderInventory(token) {
 }
 
 function renderItemList(items) {
-    let html = `<table class='itemList'><tr><th width='50%'>Name</th><th>Type</th><th>Wgt</th><th>Vol</th><th>Qty</th></tr>`;
+    let html = `<table class='itemList'><tr>
+        <th width='45%' onclick='sortTable(this, 0, false)'>Name</th>
+        <th onclick='sortTable(this, 1, false)'>Type</th>
+        <th onclick='sortTable(this, 2, true)'>Wgt</th>
+        <th onclick='sortTable(this, 3, true)'>Vol</th>
+        <th onclick='sortTable(this, 4, true)'>Qty</th>
+    </tr>`;
     if (!items || items.length === 0) return html + `<tr><td colspan='5' style='text-align:center; color:#888;'><i>Empty</i></td></tr></table>`;
 
     items.forEach(item => {
@@ -152,7 +209,7 @@ function renderItemList(items) {
             <td>${item.Type || ''}</td>
             <td>${(Number(item.Wgt) * Number(item.Qty)).toFixed(2)}</td>
             <td>${(Number(item.Vol) * Number(item.Qty)).toFixed(2)}</td>
-            <td><span class='qty-badge'>${item.Qty}</span></td>
+            <td><span class='qty-badge center'>${item.Qty}</span></td>
         </tr>`;
     });
     return html + `</table>`;
@@ -338,6 +395,7 @@ function renderBlastTable(data, radiusArr) {
 }
 
 window.onload = init;
+
 </script>
 </body>
 </html>
