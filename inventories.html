@@ -14,12 +14,16 @@
     .token-item.active { background-color: #5865F2; }
     .token-name { font-weight: bold; font-size: 12pt; }
     .token-type { font-size: 9pt; color: #aaa; }
+    .token-header { padding: 12px 15px; font-size: 13pt; font-weight: bold; border-bottom: 2px solid #555; display: flex; justify-content: space-between; align-items: center; }
+    .token-sort-btn { font-size: 8pt; font-weight: normal; color: #aaa; cursor: pointer; padding: 2px 5px; border-radius: 3px; background-color: #3e4248; border: 1px solid #555; user-select: none; }
+    .token-sort-btn:hover { color: #fff; background-color: #5865F2; }
     .header { background-color: #333; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
     .container-box { background-color: white; border: 1px solid #999; margin-bottom: 15px; padding: 5px; }
     .container-header { background-color: #ddd; padding: 4px; font-weight: bold; border-bottom: 1px solid #999; display: flex; justify-content: space-between; align-items:center; }
     .equipped-header { background-color: #444; color: #eee; padding: 5px; font-weight: bold; border-bottom: 1px solid #000; }
     table.itemList { width: 100%; border-collapse: collapse; font-size: 9pt; }
-    table.itemList th { text-align: left; background-color: #eee; border-bottom: 1px solid #ccc; padding: 6px; }
+    table.itemList th { text-align: left; background-color: #eee; border-bottom: 1px solid #ccc; padding: 6px; cursor: pointer; user-select: none; }
+    table.itemList th:hover { background-color: #ddd; }
     table.itemList td { padding: 6px; border-bottom: 1px solid #eee; cursor: pointer; }
     table.itemList tr:hover { background-color: #e6f7ff !important; }
     table.itemList tr.active { background-color: #bae7ff !important; }
@@ -232,14 +236,22 @@ function inspectItem(itemId) {
     const condDmg = Number(itemData.ConditionDamage || 0);
     const isDestroyed = itemData.Destroyed == 1;
 
+    let wClass = itemData.WeaponClass;
+    let wClassStr = '';
+    if (Array.isArray(wClass)) wClassStr = wClass.join(', ');
+    else if (wClass) wClassStr = String(wClass);
+
     let html = `
         <div style='background-color: #333; color: white; padding: 8px; font-size: 12pt; font-weight: bold;'>
             ${itemData.Name || 'Unknown Item'}
-            <div style='float:right; font-size: 10pt; font-weight: normal; color: #ccc;'>${itemData.Type || ''} (ID: ${itemId})</div>
+            <div style='float:right; font-size: 10pt; font-weight: normal; color: #ccc;'>
+                ${itemData.Type || ''}${wClassStr ? ` (${wClassStr})` : ''} (ID: ${itemId})
+            </div>
         </div>
         <div style='background-color: #555; color: #ddd; padding: 4px 8px; font-size: 9pt;'>
             ${condDmg > 0 ? `<b style='color:#fbb'>Condition Damage: ${condDmg}</b> | ` : ''}
             ${isDestroyed ? `<b style='color:red'>[DESTROYED]</b> | ` : ''}
+            ${wClassStr ? `<b>Class:</b> ${wClassStr} | ` : ''}
             <b>Weight:</b> ${itemData.Wgt || 0} kg | <b>Volume:</b> ${itemData.Vol || 0}
         </div>
         <div style='padding: 10px; background-color: #fff; border-bottom: 1px solid #ccc; font-style: italic; font-size: 11pt;'>
@@ -275,9 +287,23 @@ function inspectItem(itemId) {
             let mStr = atk.Malfunction_Rate ? (Array.isArray(atk.Malfunction_Rate) ? atk.Malfunction_Rate.join('/') : atk.Malfunction_Rate) : '-';
             if (itemData.Malfunction_Types) mStr += ` (${Object.keys(itemData.Malfunction_Types).join(', ')})`;
 
+            const pen1H = (atk['1H_Pen'] !== undefined && atk['1H_Pen'] !== null && atk['1H_Pen'] !== '')
+                          ? atk['1H_Pen']
+                          : ((atk['1HPen'] !== undefined && atk['1HPen'] !== null) ? atk['1HPen'] : '');
+            const hitMod = (atk.HitBonus !== undefined && atk.HitBonus !== null && atk.HitBonus !== '')
+                           ? atk.HitBonus
+                           : ((atk.HitMod !== undefined && atk.HitMod !== null) ? atk.HitMod : '');
+            const costMult = (atk.CostMult !== undefined && atk.CostMult !== null && atk.CostMult !== 1) ? atk.CostMult : '';
+            const reach = (atk.Reach !== undefined && atk.Reach !== null) ? atk.Reach : '';
+
+            let atkWClass = atk.WeaponClass;
+            let atkWClassStr = '';
+            if (Array.isArray(atkWClass)) atkWClassStr = atkWClass.join(', ');
+            else if (atkWClass) atkWClassStr = String(atkWClass);
+
             html += `
                 <div class='attack-box'>
-                    <div class='attack-header'>${atkName}</div>
+                    <div class='attack-header'>${atkName}${atkWClassStr ? ` <span style='font-size:9pt; font-weight:normal; color:#ddd'>(${atkWClassStr})</span>` : ''}</div>
                     <table class='stat-block'>
                         <tr>
                             <td width='33%'><span class='stat-label'>Dmg:</span> ${dStr}</td>
@@ -289,8 +315,19 @@ function inspectItem(itemId) {
                             <td><span class='stat-label'>Recoil:</span> ${atk.Recoil_Mod || '0'}</td>
                             <td><span class='stat-label'>Malf:</span> ${mStr}</td>
                         </tr>
-                    </table>
             `;
+
+            if (pen1H !== '' || (hitMod !== '' && hitMod !== 0) || costMult !== '' || reach !== '') {
+                html += `
+                        <tr>
+                            <td><span class='stat-label'>1H Penalty:</span> ${pen1H !== '' ? pen1H : '-'}</td>
+                            <td><span class='stat-label'>Hit Mod:</span> ${hitMod !== '' ? (Number(hitMod) > 0 ? `+${hitMod}` : hitMod) : '-'}</td>
+                            <td>${reach !== '' ? `<span class='stat-label'>Reach:</span> ${reach}m` : (costMult !== '' ? `<span class='stat-label'>Ammo Cost:</span> ${costMult}x` : '')}</td>
+                        </tr>
+                `;
+            }
+
+            html += `</table>`;
 
             if (atk.Qualities && Object.keys(atk.Qualities).length > 0) {
                 let qList = Object.entries(atk.Qualities).map(([k, v]) => `<span class='tag'>${k}${v === true || v === 1 || v === '' ? '' : ` (${v})`}</span>`).join('');
