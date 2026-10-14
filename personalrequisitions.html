@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset='utf-8'>
@@ -320,81 +321,6 @@ function inspectItem(refID, rowIdx) {
                 if (atk.Qualities.Blast) html += renderBlastTable(atk, atk.Qualities.Blast);
             }
             html += `</div>`;
-        }
-    }
-
-    if (itemData.AmmoPools && typeof itemData.AmmoPools === 'object') {
-        html += `<div class='sub-header'>Ammunition & Loading</div>`;
-        for (const [poolName, pData] of Object.entries(itemData.AmmoPools)) {
-            let calibers = pData.AmmoType || [];
-            let calStr = Array.isArray(calibers) ? calibers.join(', ') : calibers;
-            
-            // Reload Formula
-            let relCosts = [];
-            if (pData.Reload && typeof pData.Reload === 'object') {
-                for (const [rKey, rData] of Object.entries(pData.Reload)) {
-                    if (!Array.isArray(rData)) continue;
-                    let base = rData[0];
-                    let costStr = `${base} AP`;
-                    if (rData.length > 1) {
-                        let rateData = rData[1];
-                        let rds = typeof rateData === 'number' ? rateData : rateData[0];
-                        let groupCost = typeof rateData === 'number' ? 1 : rateData[1];
-                        costStr += ` (+${groupCost} AP per ${rds} rds)`;
-                    }
-                    relCosts.push(`<b>${rKey}</b>: ${costStr}`);
-                }
-            }
-            
-            html += `<table class='prop-table'>`;
-            html += `<tr><th colspan='2' style='text-align:left'>Pool: ${poolName} <span style='font-weight:normal; font-size:9pt; color:#ccc'>(${calStr})</span></th></tr>`;
-            if (relCosts.length > 0) {
-                html += `<tr><td colspan='2' style='background-color:#eee; font-size:9pt'>Reload Formula: ${relCosts.join(' | ')}</td></tr>`;
-            }
-            
-            // Loaded Display
-            let loadedHtml = [];
-            let hasLoaded = false;
-            
-            if (pData.LoadedMagazines && Array.isArray(pData.LoadedMagazines) && pData.LoadedMagazines.length > 0) {
-                hasLoaded = true;
-                pData.LoadedMagazines.forEach(lMag => {
-                    // Try to resolve the actual item data from the DB for its name
-                    let lmData = EXPORT_DATA.items[lMag];
-                    let lmName = lmData ? lmData.Name : `Unknown (${lMag})`;
-                    loadedHtml.push(`<span onclick="inspectItem('${lMag}')" style="cursor:pointer; color:#000080; font-weight:bold; text-decoration:underline;">${lmName}</span>`);
-                });
-            } else if (pData.LoadedAmmo && Array.isArray(pData.LoadedAmmo) && pData.LoadedAmmo.length > 0) {
-                hasLoaded = true;
-                let lastAmmo = pData.LoadedAmmo[pData.LoadedAmmo.length - 1];
-                let laData = EXPORT_DATA.items[lastAmmo];
-                let laName = laData ? laData.Name : `Unknown (${lastAmmo})`;
-                loadedHtml.push(`<span onclick="inspectItem('${lastAmmo}')" style="cursor:pointer; color:#000080; font-weight:bold; text-decoration:underline;">${laName}</span> (${pData.LoadedAmmo.length} Rds)`);
-            }
-            
-            if (hasLoaded) {
-                html += `<tr><td colspan='2' style='background-color:#eef8ee; font-size:9pt'><b>Loaded:</b> ${loadedHtml.join(', ')}</td></tr>`;
-            }
-            
-            // Magazine Types
-            if (pData.MagazineTypes && typeof pData.MagazineTypes === 'object') {
-                for (const [mt, md] of Object.entries(pData.MagazineTypes)) {
-                    let cap = md.Capacity || 0;
-                    let tags = md.MagazineTags || [];
-                    
-                    let tagsHtml = '';
-                    if (Array.isArray(tags)) {
-                        tagsHtml = tags.map(t => `<span class='tag'>${t}</span>`).join('');
-                    } else if (tags) {
-                        tagsHtml = `<span class='tag'>${tags}</span>`;
-                    }
-                    if (!tagsHtml) tagsHtml = '<i>None</i>';
-                    
-                    html += `<tr><td width='30%'><b>${mt}</b></td>`;
-                    html += `<td>Cap: <b>${cap}</b> | Compatible Tags: ${tagsHtml}</td></tr>`;
-                }
-            }
-            html += `</table>`;
         }
     }
 
