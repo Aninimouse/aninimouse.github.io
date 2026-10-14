@@ -128,6 +128,31 @@ function renderCategories() {
     if(sortedTypes.length > 0) selectCategory(sortedTypes[0]);
 }
 
+function formatQualities(quals) {
+    if (!quals || typeof quals !== 'object' || Array.isArray(quals)) return '';
+    let tags = [];
+    
+    for (const [k, v] of Object.entries(quals)) {
+        let label = k;
+        let valStr = '';
+        
+        if (k === 'Shield') {
+            label = '<b style="color:navy">Shield</b>';
+            // Extract only the numeric rating and ignore the internal armor object
+            const rating = Array.isArray(v) ? v[0] : v;
+            if (rating) valStr = ` (${rating})`;
+        } else if (k === 'Blast') {
+            // Suppress printing the raw radius array if the full table is rendered below
+            if (!Array.isArray(v) && v && v !== 1 && v !== true) valStr = ` (${v}m)`;
+        } else if (v !== 1 && v !== true && v !== '' && v !== null && v !== undefined) {
+            valStr = ` (${v})`;
+        }
+        
+        tags.push(`<span class='tag'>${label}${valStr}</span>`);
+    }
+    return tags.join('');
+}
+
 function selectCategory(type) {
     document.querySelectorAll('.token-item').forEach(el => el.classList.remove('active'));
     const tab = document.getElementById('cat-tab-' + type.replace(/\s+/g, '-'));
@@ -302,17 +327,16 @@ function inspectItem(itemId, rowIdx) {
                         </tr>
                 `;
             }
-
             html += `</table>`;
 
-            if (atk.Qualities && Object.keys(atk.Qualities).length > 0) {
-                let qList = [];
-                for (const [k, v] of Object.entries(atk.Qualities)) {
-                    qList.push(k + (v !== 1 && v !== true && v !== '' ? ` (${v})` : ''));
-                }
-                html += `<div style='padding:4px; border-top:1px solid #ddd; font-size:9pt'><b>Qualities:</b> ${qList.join(', ')}</div>`;
-                if (atk.Qualities.Blast) html += renderBlastTable(atk, atk.Qualities.Blast);
+            // Inherit parent item qualities (e.g. Balanced/Defensive on swords) + attack qualities
+            const combinedQuals = Object.assign({}, itemData.Qualities || {}, atk.Qualities || {});
+            const qBadges = formatQualities(combinedQuals);
+            if (qBadges) {
+                html += `<div style='padding:4px; border-top:1px solid #ddd; font-size:9pt'><b>Qualities:</b> ${qBadges}</div>`;
             }
+            if (combinedQuals.Blast) html += renderBlastTable(atk, combinedQuals.Blast);
+            
             html += `</div>`;
         }
     }
@@ -331,14 +355,11 @@ function inspectItem(itemId, rowIdx) {
                 </tr>
             </table>
         `;
-        if (aStats.Qualities && Object.keys(aStats.Qualities).length > 0) {
-            let qList = [];
-            for (const [k, v] of Object.entries(aStats.Qualities)) {
-                qList.push(k + (v !== 1 && v !== true && v !== '') ? ` (${v})` : '');
-            }
-            html += `<div style='padding:4px; border-bottom:1px solid #ccc; font-size:9pt; background-color:#fff'><b>Qualities:</b> ${qList.join(', ')}</div>`;
-            if (aStats.Qualities.Blast) html += renderBlastTable(aStats, aStats.Qualities.Blast);
+        const aBadges = formatQualities(aStats.Qualities);
+        if (aBadges) {
+            html += `<div style='padding:4px; border-bottom:1px solid #ccc; font-size:9pt; background-color:#fff'><b>Qualities:</b> ${aBadges}</div>`;
         }
+        if (aStats.Qualities && aStats.Qualities.Blast) html += renderBlastTable(aStats, aStats.Qualities.Blast);
     }
 
     let coverage = itemData.ArmourCoverage || (itemData.AttachmentData ? itemData.AttachmentData.ArmourCoverage : null);
@@ -365,13 +386,11 @@ function inspectItem(itemId, rowIdx) {
         html += `</table>`;
     }
 
-    if (itemData.Qualities && Object.keys(itemData.Qualities).length > 0) {
-        let qList = [];
-        for (const [k, v] of Object.entries(itemData.Qualities)) {
-            let label = k === 'Shield' && Array.isArray(v) ? '<b style=color:navy>Shield</b>' : k;
-            qList.push(label + (v !== 1 && v !== true && v !== '' ? ` (${v})` : ''));
+    if (!itemData.Attacks && itemData.Qualities) {
+        const rootBadges = formatQualities(itemData.Qualities);
+        if (rootBadges) {
+            html += `<div style='margin-top: 15px; padding: 6px; background-color: #eee; border: 1px solid #ccc; text-align: center; font-size: 10pt;'><b>Qualities:</b> ${rootBadges}</div>`;
         }
-        html += `<div style='margin-top: 15px; padding: 6px; background-color: #eee; border: 1px solid #ccc; text-align: center; font-size: 10pt;'><b>Qualities:</b> ${qList.join(', ')}</div>`;
     }
     
     if (itemData.Modifiers && Array.isArray(itemData.Modifiers) && itemData.Modifiers.length > 0) {
