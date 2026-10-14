@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Requisitions Viewer</title>
+<style>
+    body { font-family: Verdana, sans-serif; font-size: 11pt; background-color: #e0e0e0; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow:hidden;}
+    
+    .top-nav { background-color: #1a1c1e; color: #fff; display: flex; padding: 0 15px; border-bottom: 3px solid #5865F2; align-items: center; justify-content: flex-start; overflow-x: auto; white-space: nowrap; flex-shrink: 0;}
+    .top-nav a { color: #ccc; text-decoration: none; padding: 12px 15px; font-weight: bold; font-size: 10pt; transition: background 0.2s, color 0.2s; }
+    .top-nav a:hover { background-color: #2c2f33; color: #fff; }
+    .top-nav a.active { background-color: #5865F2; color: #fff; }
+
+    #app-container { display: flex; width: 100%; flex-grow: 1; overflow: hidden; }
+    
+    .col-list { width: 35%; background-color: #2c2f33; color: white; overflow-y: auto; border-right: 2px solid #111; }
+    .col-details { width: 30%; background-color: #f0f0f0; overflow-y: auto; padding: 15px; border-right: 2px solid #ccc; box-sizing: border-box; }
+    .col-inspect { width: 35%; background-color: #fff; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+    
+    .token-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
+    .token-item:hover { background-color: #3e4248; }
+    .token-item.active { background-color: #5865F2; }
+    .token-name { font-weight: bold; font-size: 11pt; flex-grow: 1; }
+    .token-cost { font-size: 10pt; color: #ddd; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; white-space: nowrap; margin-left: 10px; border-bottom: 1px dotted #888; cursor:help;}
+    .token-header { padding: 12px 15px; font-size: 13pt; font-weight: bold; border-bottom: 2px solid #555; background-color: #1a1c1e; display: flex; justify-content: space-between; align-items: center;}
+    .token-sort-btn { font-size: 8pt; font-weight: normal; color: #aaa; cursor: pointer; padding: 2px 5px; border-radius: 3px; background-color: #3e4248; border: 1px solid #555; user-select: none; }
+    .token-sort-btn:hover { color: #fff; background-color: #5865F2; }
+
+    .header { background-color: #333; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 14pt; font-weight: bold; }
+    .req-desc { background-color: #fff; padding: 10px; border: 1px solid #ccc; margin-bottom: 15px; font-size: 10pt; font-style: italic; }
+    .req-stats-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 10pt; background: #fff; border: 1px solid #ccc; }
+    .req-stats-table th { background: #eee; padding: 6px; border-bottom: 1px solid #ccc; text-align: left;}
+    .req-stats-table td { padding: 6px; border-bottom: 1px solid #eee; }
+    
+    table.itemList { width: 100%; border-collapse: collapse; font-size: 9pt; background: #fff; border: 1px solid #ccc; }
+    table.itemList th { text-align: left; background-color: #eee; border-bottom: 2px solid #ccc; padding: 8px; }
+    table.itemList td { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; }
+    table.itemList tr:hover { background-color: #e6f7ff !important; }
+    table.itemList tr.active { background-color: #bae7ff !important; }
+    .qty-badge { padding: 2px 6px; border-radius: 3px; background-color: #ddd; font-weight:bold;}
+
+    .prop-table { width: 100%; border-collapse: collapse; margin-top: 5px; border: 1px solid #ccc; }
+    .prop-table th { background-color: #444; color: white; text-align: center; padding: 4px; font-size: 10pt; }
+    .prop-table td { vertical-align: top; padding: 4px; border-bottom: 1px solid #eee; font-size: 10pt; }
+    .prop-table tr:nth-child(even) { background-color: #fcfcfc; }
+    .attack-box { border: 1px solid #888; margin-top: 5px; background-color: #fcfcfc; }
+    .attack-header { background-color: #555; color: white; padding: 4px; font-weight: bold; font-size: 11pt; }
+    .stat-block { font-size: 10pt; padding: 4px; width: 100%; border-collapse: collapse;}
+    .stat-block td { padding: 3px;}
+    .stat-label { font-weight: bold; color: #444; }
+    .sub-header { background-color: #666; color: white; padding: 4px 6px; font-weight: bold; margin-top: 15px; font-size: 11pt; }
+    .tag { background-color: #e0e0e0; border: 1px solid #ccc; padding: 1px 4px; border-radius: 2px; font-size: 9pt; margin-right: 4px; display:inline-block; margin-bottom:2px;}
+    .blast-table { width: 100%; background-color: #fff; font-size: 9pt; border: 1px solid #999; margin-top: 4px; border-collapse: collapse; }
+    .blast-table th { background-color: #722; color: white; padding: 3px; }
+    .blast-table td { border-bottom: 1px solid #eee; padding: 3px; text-align: center; }
+    .item-image-container { text-align: center; margin-top: 20px; padding: 10px; background: #f9f9f9; border: 1px solid #ccc; border-radius: 5px; }
+    .item-image-container img { max-width: 100%; max-height: 300px; object-fit: contain; border-radius: 4px; }
+
+    /* --- SEARCH BAR STYLES --- */
+    .search-container { padding: 8px 15px; background-color: #232529; border-bottom: 1px solid #111; }
+    .search-input { width: 100%; padding: 6px; box-sizing: border-box; border-radius: 4px; border: 1px solid #555; background: #1a1c1e; color: #eee; font-size: 10pt; }
+    .search-input:focus { outline: none; border-color: #5865F2; }
+    .mid-search { background-color: #e0e0e0; padding: 0 0 15px 0; border: none; }
+    .mid-search .search-input { background: #fff; color: #333; border: 1px solid #ccc; font-size: 11pt;}
+</style>
+</head>
+<body>
+
+<div class="top-nav" id="main-nav">
+    <a href="inventories.html">Inventories</a>
+    <a href="arsenal.html">Arsenal</a>
+    <a href="itemreference.html">Item Reference</a>
+    <a href="personalrequisitions.html" id="nav-personal">Personal Requisitions</a>
+    <a href="companyrequisitions.html" id="nav-company">Company Requisitions</a>
+    <a href="vehiclerequisitions.html" id="nav-vehicle">Vehicle Requisitions</a>
+    <a href="regionintel.html">Region Intel</a>
+</div>
+
+<div id='app-container'>
+    <div class='col-list' id='col-list'></div>
+    <div class='col-details' id='col-details'></div>
+    <div class='col-inspect' id='col-inspect'></div>
+</div>
+
+
+<script src="data.js"></script>
+<script>
+
+const ACTIVE_NAV = 'companyrequisitions.html'; // Set for this specific page
+const REQ_MODE = 'Company'; // 'Personal', 'Company', or 'Vehicle'
+
+const ITEM_IMAGES = {
+    "DB-47 11.5x40mm Stubber": "https://upload.wikimedia.org/wikipedia/commons/4/4b/AK-47_type_II_noBG.png"
+};
+
+let activeReqId = null;
+let reqSortAsc = true;
+
+function init() {
+    document.querySelectorAll('.top-nav a').forEach(a => {
+        if(a.getAttribute('href') === ACTIVE_NAV) a.classList.add('active');
+    });
+    renderReqList();
+}
+
+function calcCost(req) {
+    return Math.max(1, Math.round((Number(req.Cost)||0) * (Number(req.CostMod)||1)));
+}
+
+function renderReqList() {
+    const col = document.getElementById('col-list');
+    col.innerHTML = '';
+    
+    const rpMap = { 'Personal': EXPORT_DATA.config.Personal_RP || 0, 'Company': EXPORT_DATA.config.Company_Standard_RP || 0, 'Vehicle': EXPORT_DATA.config.Company_Vehicle_RP || 0 };
+    const currentRP = rpMap[REQ_MODE];
+
+    // Added Header & Search Bar
+    col.innerHTML = `
+        <div class='token-header'>
+            <div>Packages <span style='font-size:9pt; font-weight:normal; color:#8ac926; margin-left:10px;'>RP: ${currentRP}</span></div> 
+            <span><span class='token-sort-btn' onclick='toggleSort()'>Sort Name ⬍</span></span>
+        </div>
+        <div class='search-container'><input type='text' class='search-input' placeholder='Search packages...' onkeyup='filterLeftCol(this.value)'></div>
+    `;
+
+    const reqData = EXPORT_DATA[REQ_MODE];
+    if (!reqData) return;
+
+    const reqArray = Object.keys(reqData).map(k => ({ id: k, data: reqData[k] }));
+    reqArray.sort((a, b) => {
+        const nameA = a.data.Label || a.id;
+        const nameB = b.data.Label || b.id;
+        return reqSortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    });
+
+    reqArray.forEach(req => {
+        const item = document.createElement('div');
+        item.className = 'token-item';
+        item.id = 'req-tab-' + req.id;
+        item.onclick = () => selectReq(req.id);
+        
+        const base = Number(req.data.Cost) || 0;
+        const mod = Number(req.data.CostMod) || 1;
+        const finalCost = calcCost(req.data);
+        let color = finalCost > base ? '#ff6b6b' : (finalCost < base ? '#8ac926' : '#ddd');
+
+        item.innerHTML = `<div class='token-name'>${req.data.Label || req.id}</div>
+                          <div class='token-cost' title='Base: ${base} RP&#10;Multiplier: x${mod}' style='color:${color};'>${finalCost} RP</div>`;
+        col.appendChild(item);
+    });
+
+    if (reqArray.length > 0) selectReq(reqArray[0].id);
+}
+
+function toggleSort() {
+    reqSortAsc = !reqSortAsc;
+    renderReqList();
+}
+
+function selectReq(reqId) {
+    document.querySelectorAll('.token-item').forEach(el => el.classList.remove('active'));
+    const tab = document.getElementById('req-tab-' + reqId);
+    if(tab) tab.classList.add('active');
+    activeReqId = reqId;
+    
+    renderReqDetails(reqId);
+    document.getElementById('col-inspect').innerHTML = '<div style=\"color:#888; text-align:center; margin-top:40px;\"><i>Select an item to inspect its profile...</i></div>';
+}
+
+function renderReqDetails(reqId) {
+    const col = document.getElementById('col-details');
+    const data = EXPORT_DATA[REQ_MODE][reqId];
+    if (!data) return;
+
+    let html = `<div class='header'>${data.Label || reqId}</div>`;
+    if (data.Desc) html += `<div class='req-desc'>${data.Desc}</div>`;
+
+    const baseCost = Number(data.Cost) || 0;
+    const mod = Number(data.CostMod) || 1;
+    const finalCost = calcCost(data);
+    
+    // Cost Tooltip Color Logic Fixed Here
+    let costColor = finalCost > baseCost ? '#cd5c5c' : (finalCost < baseCost ? '#2e8b57' : '#000');
+
+    const globalFail = Number(EXPORT_DATA.config.Failure_Rate) || 0;
+    const failMod = Number(data.FailMod) || 0;
+    const finalFail = globalFail + failMod;
+    const limit = data.QtyLimit === -1 ? "Unlimited" : (data.QtyLimit || 0);
+
+    html += `
+        <table class='req-stats-table'>
+            <tr><th width='30%'>Cost</th><td><b title='Base: ${baseCost} RP&#10;Multiplier: x${mod}' style='color:${costColor}; cursor:help;'>${finalCost} RP</b></td></tr>
+            <tr><th>Failure Chance</th><td>${finalFail}% <span style='font-size:8pt; color:#888;'>(Global: ${globalFail}%, Mod: ${failMod > 0 ? '+'+failMod : failMod}%)</span></td></tr>
+            <tr><th>Availability</th><td>${limit}</td></tr>
+        </table>
+    `;
+
+    // Added Middle Column Search Bar for long item lists
+    if (data.Items && Array.isArray(data.Items) && data.Items.length > 0) {
+        html += `<div class='sub-header' style='margin-bottom:10px;'>Contents</div>`;
+        html += `<div class='search-container mid-search'><input type='text' class='search-input' placeholder='Search contents...' onkeyup='filterMidCol(this.value)'></div>`;
+        html += `<table class='itemList'><tr><th width='80%'>Item</th><th>Qty</th></tr>`;
+        
+        data.Items.forEach((it, idx) => {
+            const refID = it.RefID;
+            const refData = EXPORT_DATA.items[refID];
+            const name = refData ? refData.Name : `Unknown (${refID})`;
+            
+            html += `<tr onclick=\"inspectItem('${refID}', ${idx})\" id='req-item-${idx}'>
+                <td><b>${name}</b></td>
+                <td><span class='qty-badge'>${it.Qty || 1}</span></td>
+            </tr>`;
+        });
+        html += `</table>`;
+    } else {
+        html += `<div style='color:#888; text-align:center; font-style:italic; margin-top:20px;'>No distinct items associated with this package.</div>`;
+    }
+    col.innerHTML = html;
+}
+
+function inspectItem(refID, rowIdx) {
+    document.querySelectorAll('.itemList tr').forEach(el => el.classList.remove('active'));
+    const row = document.getElementById('req-item-' + rowIdx);
+    if(row) row.classList.add('active');
+    
+    const itemData = EXPORT_DATA.items[refID];
+    const col = document.getElementById('col-inspect');
+    
+    if (!itemData) {
+        col.innerHTML = `<div style='color:red;'>Failed to load internal data for ID: ${refID}</div>`;
+        return;
+    }
+
+    let wClass = itemData.WeaponClass;
+    let wClassStr = '';
+    if (Array.isArray(wClass)) wClassStr = wClass.join(', ');
+    else if (wClass) wClassStr = String(wClass);
+
+    let html = `
+        <div style='background-color: #333; color: white; padding: 8px; font-size: 12pt; font-weight: bold;'>
+            ${itemData.Name || 'Unknown Item'}
+            <div style='float:right; font-size: 10pt; font-weight: normal; color: #ccc;'>
+                ${itemData.Type || ''}${wClassStr ? ` (${wClassStr})` : ''} (Ref)
+            </div>
+        </div>
+        <div style='background-color: #555; color: #ddd; padding: 4px 8px; font-size: 9pt;'>
+            ${wClassStr ? `<b>Class:</b> ${wClassStr} | ` : ''}
+            <b>Weight:</b> ${itemData.Wgt || 0} kg | <b>Volume:</b> ${itemData.Vol || 0}
+        </div>
+        <div style='padding: 10px; background-color: #fff; border-bottom: 1px solid #ccc; font-style: italic; font-size: 11pt;'>
+            ${itemData.Desc || 'No description available.'}
+        </div>
+    `;
+
+    const isMag = ['Magazine', 'Clip', 'Ammo Belt', 'Ammo Backpack'].includes(itemData.Type);
+    if (isMag && itemData.Capacity) {
+        html += `<div class='sub-header'>Ammunition (0 / ${itemData.Capacity || 0})</div>
+                 <div style='padding:6px; background-color:#fff; border-bottom: 1px solid #ccc; font-size:10pt;'><span style='color:#888; font-style:italic'>Reference Empty</span></div>`;
+    }
+
+    if (itemData.Attacks && typeof itemData.Attacks === 'object') {
+        html += `<div class='sub-header'>Weapon Profiles</div>`;
+        for (const [atkName, atk] of Object.entries(itemData.Attacks)) {
+            const d = atk.Damage || [];
+            const dStr = d.length >= 4 ? `${d[0]}d${d[1]}+${d[2]} (${d[3]})` : '-';
+            const r = atk.Range || [];
+            let rStr = '-';
+            if (r.length === 3) {
+                const bRng = Number(r[0]), xRng = Number(r[1]), mRng = Number(r[2]);
+                rStr = mRng > 0 ? `${bRng}m (Xtr: ${bRng*xRng}m / Max: ${mRng})` : `${bRng}m (Xtr: ${bRng*xRng}m)`;
+            } else if (r.length >= 1) rStr = `${r[0]}m`;
+
+            const pen = (Number(atk.Pen) || 0) + (Number(atk.Pen_Mod) || 0);
+            let mStr = atk.Malfunction_Rate ? (Array.isArray(atk.Malfunction_Rate) ? atk.Malfunction_Rate.join('/') : atk.Malfunction_Rate) : '-';
+            if (itemData.Malfunction_Types) mStr += ` (${Object.keys(itemData.Malfunction_Types).join(', ')})`;
+
+            const pen1H = (atk['1H_Pen'] !== undefined && atk['1H_Pen'] !== null && atk['1H_Pen'] !== '') ? atk['1H_Pen'] : ((atk['1HPen'] !== undefined && atk['1HPen'] !== null) ? atk['1HPen'] : '');
+            const hitMod = (atk.HitBonus !== undefined && atk.HitBonus !== null && atk.HitBonus !== '') ? atk.HitBonus : ((atk.HitMod !== undefined && atk.HitMod !== null) ? atk.HitMod : '');
+            const costMult = (atk.CostMult !== undefined && atk.CostMult !== null && atk.CostMult !== 1) ? atk.CostMult : '';
+            const reach = (atk.Reach !== undefined && atk.Reach !== null) ? atk.Reach : '';
+
+            let atkWClass = atk.WeaponClass;
+            let atkWClassStr = '';
+            if (Array.isArray(atkWClass)) atkWClassStr = atkWClass.join(', ');
+            else if (atkWClass) atkWClassStr = String(atkWClass);
+
+            html += `
+                <div class='attack-box'>
+                    <div class='attack-header'>${atkName}${atkWClassStr ? ` <span style='font-size:9pt; font-weight:normal; color:#ddd'>(${atkWClassStr})</span>` : ''}</div>
+                    <table class='stat-block'>
+                        <tr>
+                            <td width='33%'><span class='stat-label'>Dmg:</span> ${dStr}</td>
+                            <td width='33%'><span class='stat-label'>Pen:</span> ${pen}</td>
+                            <td width='33%'><span class='stat-label'>RoF:</span> ${atk.RoF ? (Array.isArray(atk.RoF) ? atk.RoF.join('/') : atk.RoF) : '-'}</td>
+                        </tr>
+                        <tr>
+                            <td><span class='stat-label'>Rng:</span> ${rStr}</td>
+                            <td><span class='stat-label'>Recoil:</span> ${atk.Recoil_Mod || '0'}</td>
+                            <td><span class='stat-label'>Malf:</span> ${mStr}</td>
+                        </tr>
+            `;
+
+            if (pen1H !== '' || (hitMod !== '' && hitMod !== 0) || costMult !== '' || reach !== '') {
+                html += `
+                        <tr>
+                            <td><span class='stat-label'>1H Penalty:</span> ${pen1H !== '' ? pen1H : '-'}</td>
+                            <td><span class='stat-label'>Hit Mod:</span> ${hitMod !== '' ? (Number(hitMod) > 0 ? `+${hitMod}` : hitMod) : '-'}</td>
+                            <td>${reach !== '' ? `<span class='stat-label'>Reach:</span> ${reach}m` : (costMult !== '' ? `<span class='stat-label'>Ammo Cost:</span> ${costMult}x` : '')}</td>
+                        </tr>
+                `;
+            }
+            html += `</table>`;
+
+            if (atk.Qualities && Object.keys(atk.Qualities).length > 0) {
+                let qList = [];
+                for (const [k, v] of Object.entries(atk.Qualities)) {
+                    qList.push(k + (v !== 1 && v !== true && v !== '' ? ` (${v})` : ''));
+                }
+                html += `<div style='padding:4px; border-top:1px solid #ddd; font-size:9pt'><b>Qualities:</b> ${qList.join(', ')}</div>`;
+                if (atk.Qualities.Blast) html += renderBlastTable(atk, atk.Qualities.Blast);
+            }
+            html += `</div>`;
+        }
+    }
+
+    if (itemData.AmmoStats) {
+        const aStats = itemData.AmmoStats;
+        const d = aStats.Damage || [];
+        const dStr = d.length >= 4 ? `${d[0]}d${d[1]}+${d[2]} (${d[3]})` : `<span style='color:#888; font-style:italic'>Non-Standard / Blast Only</span>`;
+        html += `
+            <div class='sub-header'>Ammunition Profile</div>
+            <table class='prop-table'>
+                <tr>
+                    <td><b>Caliber:</b> ${itemData.Caliber || '-'}</td>
+                    ${d.length >= 4 ? `<td><b>Dmg:</b> ${dStr}</td><td><b>Pen:</b> ${aStats.Pen || 0}</td><td><b>Fury:</b> ${aStats.Fury || 0}</td>` : `<td colspan='3'>${dStr}</td>`}
+                    <td><b>Recoil:</b> ${aStats.Recoil || 0}</td>
+                </tr>
+            </table>
+        `;
+        if (aStats.Qualities && Object.keys(aStats.Qualities).length > 0) {
+            let qList = [];
+            for (const [k, v] of Object.entries(aStats.Qualities)) {
+                qList.push(k + (v !== 1 && v !== true && v !== '' ? ` (${v})` : ''));
+            }
+            html += `<div style='padding:4px; border-bottom:1px solid #ccc; font-size:9pt; background-color:#fff'><b>Qualities:</b> ${qList.join(', ')}</div>`;
+            if (aStats.Qualities.Blast) html += renderBlastTable(aStats, aStats.Qualities.Blast);
+        }
+    }
+
+    let coverage = itemData.ArmourCoverage || (itemData.AttachmentData ? itemData.AttachmentData.ArmourCoverage : null);
+    if (coverage && Array.isArray(coverage)) {
+        let dMult = Number(itemData.ArmourDegradeMult) || 1;
+        html += `<div class='sub-header'>Armour Protection${dMult > 1 ? ` <span style='font-weight:normal; font-size:80%; color:#fbb;'>(Degrade Mult: x${dMult})</span>` : ''}</div>
+                 <table class='prop-table'><tr><th>Part</th><th>Sub-Part</th><th>Layer(s)</th><th>Face</th><th>Imp</th><th>Prc</th><th>Rnd</th><th>Exp</th><th>Eng</th><th>Tox</th></tr>`;
+        coverage.forEach(entry => {
+            let locArr = entry[0] || [], layArr = entry[1] || [], apObj = entry[2] || {};
+            html += `<tr><td align='center'>${locArr[0] || ''}</td><td align='center'><b>${locArr[1] || ''}</b></td>
+                <td align='center'>${layArr.join(', ')}</td><td align='center' style='font-size:8pt; color:#666'>${entry.length >= 4 ? entry[3] : 'All'}</td>
+                <td align='center'>${apObj.I || 0}</td><td align='center'>${apObj.P || 0}</td><td align='center'>${apObj.R || 0}</td>
+                <td align='center'>${apObj.X || 0}</td><td align='center'>${apObj.E || 0}</td><td align='center'>${apObj.T || 0}</td></tr>`;
+        });
+        html += `</table>`;
+    }
+
+    if (itemData.AttachmentSlots) {
+        html += `<div class='sub-header'>Attachment Slots</div><table class='prop-table'><tr><th width='25%'>Slot</th><th width='75%'>Accepted Tags</th></tr>`;
+        for (const [slotName, slotData] of Object.entries(itemData.AttachmentSlots)) {
+            const tags = (slotData.AcceptedTags || []).join(', ');
+            html += `<tr><td><b>${slotName}</b></td><td style='font-size:9pt'>${tags}</td></tr>`;
+        }
+        html += `</table>`;
+    }
+
+    if (itemData.Qualities && Object.keys(itemData.Qualities).length > 0) {
+        let qList = [];
+        for (const [k, v] of Object.entries(itemData.Qualities)) {
+            let label = k === 'Shield' && Array.isArray(v) ? '<b style=color:navy>Shield</b>' : k;
+            qList.push(label + (v !== 1 && v !== true && v !== '' ? ` (${v})` : ''));
+        }
+        html += `<div style='margin-top: 15px; padding: 6px; background-color: #eee; border: 1px solid #ccc; text-align: center; font-size: 10pt;'><b>Qualities:</b> ${qList.join(', ')}</div>`;
+    }
+    
+    if (itemData.Modifiers && Array.isArray(itemData.Modifiers) && itemData.Modifiers.length > 0) {
+        html += `<div class='sub-header'>Passive Modifiers</div><div style='padding: 6px; background-color: #fff; border: 1px solid #ccc; font-size: 10pt;'>`;
+        itemData.Modifiers.forEach(m => {
+            if (m.Type === 'Note') html += `• <b>Note:</b> ${m.Value}<br>`;
+            else html += `• ${m.Target} ${(m.Operation === 'Multiply' || m.Operation === 'Mult') ? 'x' : (Number(m.Value) >= 0 && m.Operation !== 'Set' ? '+' : '')}${m.Value}<br>`;
+        });
+        html += `</div>`;
+    }
+
+    if (ITEM_IMAGES[itemData.Name]) {
+        html += `
+            <div class="item-image-container">
+                <img src="${ITEM_IMAGES[itemData.Name]}" alt="${itemData.Name}" onerror="this.parentElement.style.display='none';" />
+            </div>
+        `;
+    }
+
+    col.innerHTML = html;
+}
+
+function renderBlastTable(data, radiusArr) {
+    if (!Array.isArray(radiusArr)) radiusArr = [radiusArr];
+    let html = `<table class='blast-table'><tr><th>Zone</th><th>Radius</th><th>Damage</th><th>Pen</th><th>Fury</th></tr>`;
+    for(let i = 0; i < radiusArr.length; i++) {
+        let label = radiusArr.length === 1 ? 'Blast' : (radiusArr.length === 2 ? (i===0?'Inner':'Outer') : (i===0?'Inner':(i===1?'Mid':'Outer')));
+        let d = (data.BlastDamage || [])[i] || [];
+        html += `<tr><td><b>${label}</b></td><td>${radiusArr[i]}m</td><td>${d.length >= 4 ? `${d[0]}d${d[1]}+${d[2]} (${d[3]})` : '-'}</td>
+                 <td>${(data.BlastPen || [])[i] || '-'}</td><td>${(data.BlastFury || [])[i] || '-'}+</td></tr>`;
+    }
+    return html + `</table>`;
+}
+
+function filterLeftCol(query) {
+    const lowerQuery = query.toLowerCase();
+    document.querySelectorAll('.token-item').forEach(item => {
+        item.style.display = item.innerText.toLowerCase().includes(lowerQuery) ? '' : 'none';
+    });
+}
+
+function filterMidCol(query) {
+    const lowerQuery = query.toLowerCase();
+    document.querySelectorAll('.itemList tr[id]').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(lowerQuery) ? '' : 'none';
+    });
+
+    // Hide entire container blocks in Arsenal/Inventories if no items match
+    document.querySelectorAll('.container-box').forEach(box => {
+        const rows = box.querySelectorAll('.itemList tr[id]');
+        if (rows.length === 0) return;
+        const visible = Array.from(rows).some(r => r.style.display !== 'none');
+        box.style.display = (!visible && query.trim() !== '') ? 'none' : '';
+    });
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
