@@ -87,5 +87,7 @@ const ITEM_IMAGES = {
     "DB-209 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
     "DB-259 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
     "DB-309 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
-    "DB-97-20 Heavy Stub Sniper": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000"
+    "DB-97-20 Heavy Stub Sniper (20x90mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000",
+    "DB-97-25 Heavy Stub Sniper (25x100mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000",
+    "DB-97-30 Heavy Stub Sniper (30x100mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000"
 };
