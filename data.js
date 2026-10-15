@@ -91,5 +91,11 @@ const ITEM_IMAGES = {
     "DB-97-20 Heavy Stub Sniper (20x90mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000",
     "DB-97-25 Heavy Stub Sniper (25x100mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000",
     "DB-97-30 Heavy Stub Sniper (30x100mm)": "https://drive.google.com/thumbnail?id=1vxSHHmW308ZA-ohdfB5Gvvt2HQnhACOy&sz=w1000",
-    "DB-S39 Carapace Armour": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000"
+    "DB-S39 Carapace Armour": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000",
+    "DB-92 Chest Rig (Ogryn)": "https://drive.google.com/thumbnail?id=1QV2PTrzmiiPd4hE9ZmJWyNE77_qYixbJ&sz=w1000",
+    "DB-92 Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=1QV2PTrzmiiPd4hE9ZmJWyNE77_qYixbJ&sz=w1000",
+    "DB-A Chest Rig (Ogryn)": "https://drive.google.com/thumbnail?id=14uKv62EG1w7oOQ2swFXjMW_cHNcsUYRZ&sz=w1000",
+    "DB-A Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=14uKv62EG1w7oOQ2swFXjMW_cHNcsUYRZ&sz=w1000",
+    "DB-K Chest Rig (Ogryn)": "https://drive.google.com/thumbnail?id=1_nouMEPJ41WlTZOJi1XAsPJxIC67sry9&sz=w1000",
+    "DB-K Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=1_nouMEPJ41WlTZOJi1XAsPJxIC67sry9&sz=w1000"
 };
