@@ -84,5 +84,8 @@ const ITEM_IMAGES = {
     "DB-20 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
     "DB-25 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
     "DB-30 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
+    "DB-209 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
+    "DB-259 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
+    "DB-309 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
     "DB-3 Stub Gun": "https://drive.google.com/thumbnail?id=1dihess7HlLDUH5tPUHGbYvAUnksIp2Qy&sz=w1000"
 };
