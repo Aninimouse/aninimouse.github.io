@@ -80,5 +80,8 @@ const ITEM_IMAGES = {
     "Navrod Pattern III 6.5x40mm Stubber": "https://drive.google.com/thumbnail?id=1Mi4LRiv4wCayvNLPngvo92Q_E7t0fbJx&sz=w1000",
     "Navrod Pattern IV Heavy Stubber": "https://drive.google.com/thumbnail?id=1fz0lNCsk_aSOfvWfQU2Dvc2ShnZyH9gx&sz=w1000",
     "DB Tanker Cap": "https://drive.google.com/thumbnail?id=1YHVUvHAhalrpeKhP0RGL3bKf9aC3OLDN&sz=w1000",
-    "DB-3 Stub Gun": "https://drive.google.com/thumbnail?id=1dihess7HlLDUH5tPUHGbYvAUnksIp2Qy&sz=w1000"
+    "DB-3 Stub Gun": "https://drive.google.com/thumbnail?id=1dihess7HlLDUH5tPUHGbYvAUnksIp2Qy&sz=w1000",
+    "DB-20 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
+    "DB-25 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000",
+    "DB-30 Light Autocannon": "https://drive.google.com/thumbnail?id=1dm9V2yCJFU4SfrQ2GJ7Nkd8FWjvTwwWN&sz=w1000"
 };
