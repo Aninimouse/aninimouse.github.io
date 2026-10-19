@@ -93,5 +93,9 @@ const ITEM_IMAGES = {
     "DB-A Chest Rig (Ogryn)": "https://drive.google.com/thumbnail?id=14uKv62EG1w7oOQ2swFXjMW_cHNcsUYRZ&sz=w1000",
     "DB-A Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=14uKv62EG1w7oOQ2swFXjMW_cHNcsUYRZ&sz=w1000",
     "DB-K Chest Rig (Ogryn)": "https://drive.google.com/thumbnail?id=1_nouMEPJ41WlTZOJi1XAsPJxIC67sry9&sz=w1000",
-    "DB-K Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=1_nouMEPJ41WlTZOJi1XAsPJxIC67sry9&sz=w1000"
+    "DB-K Chest Rig (Weedy)": "https://drive.google.com/thumbnail?id=1_nouMEPJ41WlTZOJi1XAsPJxIC67sry9&sz=w1000",
+    "DB-S39 Carapace Armour (Ogryn)": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000",
+    "DB-S39 Carapace Armour (Small)": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000",
+    "Navrod Pattern XI Stub Sniper (8x50mm)": "https://drive.google.com/thumbnail?id=1SJEPf7Ez3h2uwYhFa7P5kPPSXhquOww3&sz=w1000",
+    "DB-99 Rocket Launcher": "https://drive.google.com/thumbnail?id=1MpqHOAHtYNQ02XdFg_VyF8tGqrdoyE3w&sz=w1000"
 };
