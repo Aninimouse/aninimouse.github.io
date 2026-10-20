@@ -288,7 +288,16 @@ function inspectItem(itemId) {
         return;
     }
 
-    const condDmg = Number(itemData.ConditionDamage || 0);
+    let condDmg = 0;
+    if (typeof itemData.ConditionDamage === 'number') {
+        condDmg = itemData.ConditionDamage;
+    } else if (itemData.ConditionDamage && typeof itemData.ConditionDamage === 'object') {
+        for (const sub of Object.values(itemData.ConditionDamage)) {
+            if (typeof sub === 'object' && sub !== null) {
+                for (const val of Object.values(sub)) condDmg += Number(val) || 0;
+            }
+        }
+    }
     const isDestroyed = itemData.Destroyed == 1;
 
     let wClass = itemData.WeaponClass;
@@ -489,17 +498,46 @@ function inspectItem(itemId) {
         }
     }
 
-    let coverage = itemData.ArmourCoverage || (itemData.AttachmentData ? itemData.AttachmentData.ArmourCoverage : null);
+let coverage = itemData.ArmourCoverage || (itemData.AttachmentData ? itemData.AttachmentData.ArmourCoverage : null);
     if (coverage && Array.isArray(coverage)) {
         let dMult = Number(itemData.ArmourDegradeMult) || 1;
+        const cDmgObj = (typeof itemData.ConditionDamage === 'object' && itemData.ConditionDamage !== null) ? itemData.ConditionDamage : {};
+
         html += `<div class='sub-header'>Armour Protection${dMult > 1 ? ` <span style='font-weight:normal; font-size:80%; color:#fbb;'>(Degrade Mult: x${dMult})</span>` : ''}</div>
-                 <table class='prop-table'><tr><th>Part</th><th>Sub-Part</th><th>Layer(s)</th><th>Face</th><th>Imp</th><th>Prc</th><th>Rnd</th><th>Exp</th><th>Eng</th><th>Tox</th></tr>`;
+                 <table class='prop-table'>
+                    <tr><th>Part</th><th>Sub-Part</th><th>Layer(s)</th><th>Face</th><th>Imp</th><th>Prc</th><th>Rnd</th><th>Exp</th><th>Eng</th><th>Tox</th></tr>`;
+        
+        const dmgTypes = ['I', 'P', 'R', 'X', 'E', 'T'];
+
         coverage.forEach(entry => {
             let locArr = entry[0] || [], layArr = entry[1] || [], apObj = entry[2] || {};
-            html += `<tr><td align='center'>${locArr[0] || ''}</td><td align='center'><b>${locArr[1] || ''}</b></td>
-                <td align='center'>${layArr.join(', ')}</td><td align='center' style='font-size:8pt; color:#666'>${entry.length >= 4 ? entry[3] : 'All'}</td>
-                <td align='center'>${apObj.I || 0}</td><td align='center'>${apObj.P || 0}</td><td align='center'>${apObj.R || 0}</td>
-                <td align='center'>${apObj.X || 0}</td><td align='center'>${apObj.E || 0}</td><td align='center'>${apObj.T || 0}</td></tr>`;
+            let topPart = locArr[0] || '';
+            let subPart = locArr[1] || '';
+            let face = entry.length >= 4 ? entry[3] : 'All';
+
+            // Find damage taken by this specific sub-part (e.g. "Thorax", "Abdomen")
+            let partDmg = cDmgObj[subPart] || {};
+
+            html += `<tr>
+                <td align='center'>${topPart}</td>
+                <td align='center'><b>${subPart}</b></td>
+                <td align='center'>${layArr.join(', ')}</td>
+                <td align='center' style='font-size:8pt; color:#666'>${face}</td>`;
+
+            // Calculate each resistance type
+            dmgTypes.forEach(t => {
+                let baseVal = Number(apObj[t]) || 0;
+                let dmgVal = Number(partDmg[t]) || 0;
+                let curVal = Math.max(0, baseVal - dmgVal);
+
+                if (dmgVal > 0) {
+                    html += `<td align='center'><span style='color:red; font-weight:bold; cursor:help;' title='Original: ${baseVal} (-${dmgVal})'>${curVal}</span></td>`;
+                } else {
+                    html += `<td align='center'>${baseVal}</td>`;
+                }
+            });
+
+            html += `</tr>`;
         });
         html += `</table>`;
     }
