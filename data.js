@@ -98,5 +98,9 @@ const ITEM_IMAGES = {
     "DB-S39 Carapace Armour (Ogryn)": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000",
     "DB-S39 Carapace Armour (Small)": "https://drive.google.com/thumbnail?id=1kbLozKzmR4DQLfwi6ExlUl2oVaZx4qFh&sz=w1000",
     "Navrod Pattern XI Stub Sniper (8x50mm)": "https://drive.google.com/thumbnail?id=1SJEPf7Ez3h2uwYhFa7P5kPPSXhquOww3&sz=w1000",
-    "DB-99 Rocket Launcher": "https://drive.google.com/thumbnail?id=1MpqHOAHtYNQ02XdFg_VyF8tGqrdoyE3w&sz=w1000"
+    "DB-99 Rocket Launcher": "https://drive.google.com/thumbnail?id=1MpqHOAHtYNQ02XdFg_VyF8tGqrdoyE3w&sz=w1000",
+    "Navrod Pattern IX 12x25mm Stub Automatic": "https://drive.google.com/thumbnail?id=14iRL1LDwqHST1kOyIQXJnPhpZZyM8RcC&sz=w1000",
+    "Navrod Pattern VIII Rocket Launcher": "https://drive.google.com/thumbnail?id=1GP16O_8DYwCCeJ1YFY6u61LCQ0FP8sa2&sz=w1000",
+    "Navrod Pattern VI 10x20mm Autostub": "https://drive.google.com/thumbnail?id=1a4Z9cBEW17FHatLz5_awjqe8XfQiaS6_&sz=w1000",
+    "DB-61 Bolt Pistol": "https://drive.google.com/thumbnail?id=1K1JLUsKsRFofjA_mDBKAgbYlopgZrOYN&sz=w1000"
 };
